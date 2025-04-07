@@ -1,5 +1,5 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
+# USER $APP_UID  <-- możesz zakomentować na testy
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -7,10 +7,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["IZ.DockerDashboard.Web/IZ.DockerDashboard.Web.csproj", "IZ.DockerDashboard.Web/"]
-RUN dotnet restore "IZ.DockerDashboard.Web/IZ.DockerDashboard.Web.csproj"
+COPY ["src/IZ.DockerDashboard.Web/IZ.DockerDashboard.Web.csproj", "src/IZ.DockerDashboard.Web/"]
+RUN dotnet restore "src/IZ.DockerDashboard.Web/IZ.DockerDashboard.Web.csproj"
 COPY . .
-WORKDIR "/src/IZ.DockerDashboard.Web"
+WORKDIR "/src/src/IZ.DockerDashboard.Web"
 RUN dotnet build "IZ.DockerDashboard.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
