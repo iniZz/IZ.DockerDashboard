@@ -1,0 +1,6 @@
+﻿services:
+  iz.dockerdashboard.web:
+    image: iz.dockerdashboard.web
+    build:
+      context: .
+      dockerfile: IZ.DockerDashboard.Web/Dockerfile

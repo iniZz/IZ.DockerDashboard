@@ -1,0 +1,26 @@
+## Build
+bin/
+obj/
+out/
+
+## VS / Rider
+.vscode/
+.idea/
+.vs/
+*.user
+*.suo
+
+## Logs
+*.log
+
+## Environment
+.env
+
+## Dependencies
+*.nupkg
+*.snupkg
+packages/
+
+## Publish artifacts
+wwwroot/css/app.bundle.css
+wwwroot/js/app.bundle.js
