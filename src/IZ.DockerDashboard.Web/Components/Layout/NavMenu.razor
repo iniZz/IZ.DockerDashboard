@@ -1,92 +1,134 @@
-﻿@implements IDisposable
+﻿@using IZ.DockerDashboard.Web.Models.NavigationMenu
+@using IZ.DockerDashboard.Web.Services.Navigation
+@inject IMenuService MenuService
+@inject LayoutService LayoutService
+@inject IStringLocalizer<NavMenu> L
 
-@inject NavigationManager NavigationManager
+<MudDrawer Breakpoint="Breakpoint.Md"
+           Class="side-menu"
+           Elevation="0"
+           Open="DrawerOpen"
+           OpenChanged="@(e => DrawerOpenChanged.InvokeAsync(e))"
+           Variant="DrawerVariant.Responsive">
+    <MudDrawerHeader Class="align-center d-flex align-center pa-0">
+        <MudIcon Class="ml-6 mr-2"
+                 Color="Color.Primary"
+                 Icon="@Icons.Custom.Brands.MudBlazor"
+                 Size="Size.Large"/>
+        <MudText Typo="Typo.h6">
+            @L[ApplicationSettings.AppName]
+        </MudText>
+    </MudDrawerHeader>
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">IZ.DockerDashboard.Web</a>
-    </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler"/>
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div>
-
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
-                    </NavLink>
+    <MudNavMenu>
+        @foreach (var section in MenuSections.Where(x => x.Roles == null || x.Roles.Any(x => Roles.Contains(x))))
+        {
+            @if (section is not null)
+            {
+                <div class="@(LayoutService.IsRTL ? "mr-6" : "ml-6") my-3">
+                    <MudText Typo="Typo.subtitle1">
+                        <b>
+                            @(L[section.Title])
+                        </b>
+                    </MudText>
                 </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken/>
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl"/>
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
-    </nav>
-</div>
 
-@code {
-    private string? currentUrl;
 
-    protected override void OnInitialized()
+                @if (section.SectionItems is not null)
+                {
+                    @foreach (var sectionItem in section.SectionItems.Where(x => x.Roles == null || x.Roles.Any(x => Roles.Contains(x))))
+                    {
+                        @if (sectionItem is { IsParent: true, MenuItems: not null })
+                        {
+                            <MudNavGroup Icon="@sectionItem.Icon" Title="@L[sectionItem.Title]" Expanded="Expanded(sectionItem)">
+                                @foreach (var menuItem in sectionItem.MenuItems.Where(x => x.Roles == null || x.Roles.Any(x => Roles.Contains(x))))
+                                {
+                                    <MudNavLink Disabled="@(menuItem.PageStatus != PageStatus.Completed)" Href="@(menuItem.Href)" Target="@(menuItem.Target)" Match="NavLinkMatch.Prefix">
+                                        <div class="d-flex">
+                                            @(L[menuItem.Title])
+                                            @if (menuItem.PageStatus != PageStatus.Completed)
+                                            {
+                                                <MudSpacer/>
+                                                <MudChip T="string" Class="mr-4" Color="@Color.Primary" Size="Size.Small" Variant="Variant.Text">
+                                                    @(L[menuItem.PageStatus.GetDescription()])
+                                                </MudChip>
+                                            }
+                                        </div>
+                                    </MudNavLink>
+                                }
+                            </MudNavGroup>
+                        }
+                        else
+                        {
+                            <MudNavLink Disabled="@(sectionItem.PageStatus != PageStatus.Completed)" Href="@(sectionItem.Href)" Icon="@(sectionItem.Icon)" Target="@(sectionItem.Target)" Match="NavLinkMatch.All">
+                                <div class="d-flex">
+                                    @(L[sectionItem.Title])
+                                    @if (sectionItem.PageStatus != PageStatus.Completed)
+                                    {
+                                        <MudSpacer/>
+                                        <MudChip T="string" Class="mr-4" Color="@Color.Primary" Size="Size.Small" Variant="Variant.Text">
+                                            @(L[sectionItem.PageStatus.GetDescription()])
+                                        </MudChip>
+                                    }
+                                </div>
+                            </MudNavLink>
+                        }
+                    }
+                }
+            }
+        }
+    </MudNavMenu>
+
+    <MudDivider Class="mt-auto"></MudDivider>
+    <MudNavMenu Class="d-flex justify-space-between pa-4">
+        <MudLink Href="#" Style="font-size:0.625rem;line-height:1.125rem;color:#6F6F6F !important">@L[ApplicationSettings.Copyright]</MudLink>
+        <MudText Class="" Style="font-size:0.625rem;line-height:1.125rem;color:#6F6F6F !important">@L["version"] @ApplicationSettings.Version</MudText>
+    </MudNavMenu>
+
+</MudDrawer>
+
+
+@if (LayoutService.IsRTL)
+{
+    <style>
+        .mud-nav-link.active:not(.mud-nav-link-disabled) {
+            border-left: 3px solid var(--mud-palette-primary);
+            background-color: rgba(var(--mud-palette-primary-rgb), 0.1);
+        }
+
+        .side-menu {
+            border-left: 1px solid var(--mud-palette-table-lines)
+        }
+    </style>
+}
+else
+{
+    <style>
+        .mud-nav-link.active:not(.mud-nav-link-disabled) {
+            border-right: 3px solid var(--mud-palette-primary);
+        }
+
+        .side-menu {
+            border-right: 1px solid var(--mud-palette-table-lines)
+        }
+    </style>
+}
+
+@code
+{
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+    [EditorRequired] [Parameter] public EventCallback<bool> DrawerOpenChanged { get; set; }
+
+    [EditorRequired] [Parameter] public bool DrawerOpen { get; set; }
+
+    private IEnumerable<MenuSectionModel> MenuSections => MenuService.Features;
+    [EditorRequired] [Parameter] public string[] Roles { get; set; } = Array.Empty<string>();
+
+    private bool Expanded(MenuSectionItemModel menu)
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
+        var href = Navigation.Uri[(Navigation.BaseUri.Length - 1)..];
+        return menu is { IsParent: true, MenuItems: not null } &&
+               menu.MenuItems.Any(x => !string.IsNullOrEmpty(x.Href) && href.Contains(x.Href));
     }
 
 }

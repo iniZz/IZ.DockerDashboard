@@ -1,0 +1,69 @@
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Reflection
+@using System.Text
+@using System.ComponentModel
+@using IZ.DockerDashboard.Application.Common.Interfaces.MediatorWrapper
+@using IZ.DockerDashboard.Web.Services
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Localization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.JSInterop
+@using MudBlazor
+@using MediatR
+@using AutoMapper
+@using AutoMapper.QueryableExtensions
+@using FluentValidation;
+@using IZ.DockerDashboard.Domain
+@using IZ.DockerDashboard.Application.Common.ExceptionHandlers
+@using IZ.DockerDashboard.Application.Common.Extensions
+@using IZ.DockerDashboard.Application.Common.Interfaces
+@using IZ.DockerDashboard.Application.Common.Models
+@using IZ.DockerDashboard.Application.Common.Security
+@using IZ.DockerDashboard.Infrastructure.PermissionSet;
+@using IZ.DockerDashboard.Infrastructure.Constants
+@using IZ.DockerDashboard.Infrastructure.Extensions
+@using IZ.DockerDashboard.Infrastructure.Configurations
+@using IZ.DockerDashboard.Web.Models
+@using IZ.DockerDashboard.Web
+@* @using IZ.DockerDashboard.Web.Shared *@
+@using IZ.DockerDashboard.Web.Components
+@* @using IZ.DockerDashboard.Web.Components.Forms *@
+@* @using IZ.DockerDashboard.Web.Components.Breadcrumbs *@
+@* @using IZ.DockerDashboard.Web.Components.LoadingButton *@
+@* @using IZ.DockerDashboard.Web.Components.Autocompletes *@
+@* @using IZ.DockerDashboard.Web.Components.Dialogs *@
+@* @using IZ.DockerDashboard.Web.Components.Identity *@
+@* @using IZ.DockerDashboard.Web.Pages.Identity.Authentication *@
+@* @using IZ.DockerDashboard.Web.Components.Localization *@
+@* @using IZ.DockerDashboard.Web.Components.OptionSelect *@
+@* @using IZ.DockerDashboard.Web.Components.Redirections *@
+@* @using IZ.DockerDashboard.Web.Components.Shared *@
+@* @using IZ.DockerDashboard.Web.Components.Shared.Themes *@
+@* @using IZ.DockerDashboard.Web.Components.Shared.Layout *@
+@using IZ.DockerDashboard.Web.Components.Layout
+@using IZ.DockerDashboard.Web.Services.Layout
+@* @using IZ.DockerDashboard.Web.Extensions *@
+@* @using IZ.DockerDashboard.Web.Services.JsInterop *@
+@using Severity=MudBlazor.Severity
+@using Color = MudBlazor.Color
+@inject IApplicationSettings ApplicationSettings
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject IConfiguration Config
+@inject IAuthorizationService AuthService
+@inject IValidationService Validator
+@inject IJSRuntime JS
+@inject IMediator Mediator
+@inject NavigationManager Navigation
+@* @inject DialogServiceHelper DialogServiceHelper *@
+@inject IPermissionService PermissionService
+@inject IMapper Mapper

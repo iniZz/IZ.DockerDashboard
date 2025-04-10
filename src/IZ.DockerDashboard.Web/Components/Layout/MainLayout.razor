@@ -1,23 +1,55 @@
 ﻿@inherits LayoutComponentBase
+@using IZ.DockerDashboard.Web.Services.JsInterop
+@using IZ.DockerDashboard.Web.Themes
+@implements IDisposable
+@inject LayoutService LayoutService
+<PageTitle>@ApplicationSettings.AppName</PageTitle>
+<MudRTLProvider RightToLeft="@LayoutService.IsRTL">
+    <MudPopoverProvider />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
+    <MudThemeProvider @ref="@_mudThemeProvider" Theme="@LayoutService.CurrentTheme" IsDarkMode="@LayoutService.IsDarkMode" IsDarkModeChanged="@LayoutService.SetDarkMode" />
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
+    @Body
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+</MudRTLProvider>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+@code
+{
+    private MudThemeProvider _mudThemeProvider = null!;
+    private bool _defaultDarkMode;
+    public void Dispose()
+    {
+        LayoutService.MajorUpdateOccured -= LayoutServiceOnMajorUpdateOccured;
+        GC.SuppressFinalize(this);
+    }
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            await ApplyUserPreferences();
+            StateHasChanged();
+        }
+    }
+
+    private async Task ApplyUserPreferences()
+    {
+        _defaultDarkMode = await _mudThemeProvider.GetSystemPreference();
+        await LayoutService.ApplyUserPreferences(_defaultDarkMode);
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        LayoutService.MajorUpdateOccured += LayoutServiceOnMajorUpdateOccured;
+        LayoutService.SetBaseTheme(Theme.ApplicationTheme());
+        return base.OnInitializedAsync();
+    }
+
+    private void LayoutServiceOnMajorUpdateOccured(object? sender, EventArgs e)
+    {
+        InvokeAsync(() => StateHasChanged());
+    }
+
+}
